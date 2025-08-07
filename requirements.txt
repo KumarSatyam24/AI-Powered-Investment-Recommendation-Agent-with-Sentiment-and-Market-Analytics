@@ -25,3 +25,5 @@ psycopg2-binary  # for QuestDB PostgreSQL compatibility
 numpy
 requests
 pandas
+praw
+python-dotenv
