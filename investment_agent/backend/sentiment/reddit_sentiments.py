@@ -1,0 +1,1 @@
+from backend.sentiment.sentiment_model import sentiment_analyzer

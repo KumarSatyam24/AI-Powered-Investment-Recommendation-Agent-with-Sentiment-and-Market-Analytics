@@ -1,0 +1,27 @@
+# Core packages
+yfinance
+newsapi-python
+
+# Hugging Face Transformers for sentiment analysis
+transformers
+torch
+
+# Web app UI
+streamlit
+
+# Plotting (optional for visuals)
+matplotlib
+seaborn
+plotly
+
+# LangChain (future use)
+langchain
+
+# For SQLite & Postgres support
+sqlite-utils
+psycopg2-binary  # for QuestDB PostgreSQL compatibility
+
+# Other utils
+numpy
+requests
+pandas
