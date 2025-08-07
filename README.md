@@ -23,7 +23,7 @@ The Stocks Recommendation System is a software project designed to analyze stock
 ## Installation
 1. Clone the repository:
     ```bash
-    git clone <repository-url>
+    git clone [<repository-url>](https://github.com/KumarSatyam24/AI-Powered-Investment-Recommendation-Agent-with-Sentiment-and-Market-Analytics.git)
     ```
 2. Install dependencies:
     ```bash
