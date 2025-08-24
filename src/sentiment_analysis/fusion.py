@@ -1,4 +1,4 @@
-from backend.sentiment.sentiment_model import analyze_sentiment
+from .sentiment_model import analyze_sentiment
 
 def fuse_sentiments(news_headlines, reddit_posts, twitter_posts):
     news_sentiment = analyze_sentiment(news_headlines)

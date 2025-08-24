@@ -2,6 +2,10 @@
 yfinance
 newsapi-python
 
+# New API clients
+alpha-vantage  # For Alpha Vantage API (alternative: requests)
+fredapi       # For FRED economic data (alternative: requests)
+
 # Hugging Face Transformers for sentiment analysis
 transformers
 torch
@@ -27,3 +31,6 @@ requests
 pandas
 praw
 python-dotenv
+emoji
+langdetect
+tweepy
