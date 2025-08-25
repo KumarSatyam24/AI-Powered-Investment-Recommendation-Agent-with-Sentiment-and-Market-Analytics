@@ -3,11 +3,11 @@ API Testing and Demo Script
 Test all implemented APIs and show their capabilities.
 """
 
-from backend.alpha_vantage_api import alpha_vantage
-from backend.fred_api import fred_api
-from backend.marketaux_api import marketaux_api
-from backend.data_fetch import get_enhanced_stock_data, get_market_conditions, get_enhanced_news_sentiment
-from backend.market_analysis import analyze_market, get_sector_analysis
+from src.api_clients.alpha_vantage_api import alpha_vantage
+from src.api_clients.fred_api import fred_api
+from src.api_clients.marketaux_api import marketaux_api
+from src.data_processing.data_fetch import get_enhanced_stock_data, get_market_conditions, get_enhanced_news_sentiment
+from src.analysis_engine.market_analysis import analyze_market, get_sector_analysis
 
 def test_alpha_vantage():
     """Test Alpha Vantage API functionality."""

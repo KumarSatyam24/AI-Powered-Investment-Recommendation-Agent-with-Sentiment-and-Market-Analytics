@@ -5,7 +5,7 @@ SENTIMENT_SCORE = {
     "NEUTRAL": 0,
     "NEGATIVE": -1
 }
-from backend.data_fetch import get_reddit_posts
+from src.data_processing.data_fetch import get_reddit_posts
 from .sentiment_model import sentiment_analyzer
 from transformers import pipeline
 from datetime import datetime, timedelta

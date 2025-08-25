@@ -1,7 +1,7 @@
 from langdetect import detect
 import emoji
 from .sentiment_model import sentiment_analyzer, general_sentiment_analyzer
-from backend.data_fetch import get_tweets
+from src.data_processing.data_fetch import get_tweets
 import re
 
 # Contractions dictionary for expansion

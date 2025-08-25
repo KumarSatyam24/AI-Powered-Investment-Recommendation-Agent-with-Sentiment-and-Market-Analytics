@@ -67,15 +67,14 @@ MARKETAUX_API_KEY=your_marketaux_api_key_here
 
 ### Step 4: Test the Integration
 ```bash
-cd investment_agent
-python api_test.py
+python tests/api_test.py
 ```
 
 ## 🎯 Usage Examples
 
 ### Enhanced Stock Data
 ```python
-from backend.data_fetch import get_enhanced_stock_data
+from src.data_processing.data_fetch import get_enhanced_stock_data
 
 # Get comprehensive stock information
 stock_data = get_enhanced_stock_data('AAPL')
@@ -86,7 +85,7 @@ print(f"Technical SMA: {stock_data['technical_indicators']['sma_20']}")
 
 ### Market Analysis with Economic Data
 ```python
-from backend.market_analysis import analyze_market
+from src.analysis_engine.market_analysis import analyze_market
 
 # Get comprehensive market analysis
 analysis = analyze_market()
@@ -97,7 +96,7 @@ print(f"Recommendation: {analysis['recommendation']}")
 
 ### News Sentiment Analysis
 ```python
-from backend.data_fetch import get_enhanced_news_sentiment
+from src.data_processing.data_fetch import get_enhanced_news_sentiment
 
 # Get sentiment for specific stock
 sentiment = get_enhanced_news_sentiment('TSLA')

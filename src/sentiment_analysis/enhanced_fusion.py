@@ -48,7 +48,7 @@ def enhanced_sentiment_analysis(ticker, use_finbert=True, use_marketaux=True, us
                 marketaux_score = positive_pct - negative_pct
                 
                 scores.append(marketaux_score)
-                weights.append(0.4)  # 40% weight for professional news
+                weights.append(0.5)  # 40% weight for professional news
                 
                 sentiment_data['sources']['marketaux'] = {
                     'score': marketaux_score,
@@ -96,7 +96,7 @@ def enhanced_sentiment_analysis(ticker, use_finbert=True, use_marketaux=True, us
                 reddit_score = 0.5 if reddit_sentiment == "Positive" else -0.5 if reddit_sentiment == "Negative" else 0.0
                 
                 scores.append(reddit_score)
-                weights.append(0.2)  # 20% weight for social sentiment
+                weights.append(0.1)  # 20% weight for social sentiment
                 
                 sentiment_data['sources']['reddit'] = {
                     'score': reddit_score,

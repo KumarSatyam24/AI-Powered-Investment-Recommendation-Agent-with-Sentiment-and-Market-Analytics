@@ -1,5 +1,5 @@
 from .sentiment_model import sentiment_analyzer
-from backend.data_fetch import get_latest_headlines
+from src.data_processing.data_fetch import get_latest_headlines
 
 def analyze_news_sentiment(ticker):
     """

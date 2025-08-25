@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-from backend.data_fetch import get_enhanced_stock_data, get_enhanced_news_sentiment
-from backend.market_analysis import analyze_market
-from backend.recommendations import generate_recommendation
+from src.data_processing.data_fetch import get_enhanced_stock_data, get_enhanced_news_sentiment
+from src.analysis_engine.market_analysis import analyze_market
+from src.analysis_engine.recommendations import generate_recommendation
 
 def comprehensive_analysis():
     print('🔍 Comprehensive Stock Analysis for AAPL')
