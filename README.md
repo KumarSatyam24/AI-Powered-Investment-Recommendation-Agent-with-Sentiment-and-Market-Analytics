@@ -286,7 +286,7 @@ export STREAMLIT_SERVER_PORT=8501
 
 **Satyam Kumar**  
 - GitHub: [@KumarSatyam24](https://github.com/KumarSatyam24)
-- LinkedIn: [Connect](https://linkedin.com/in/your-profile)
+- LinkedIn: [Connect](https://linkedin.com/in/satyam-kumar-9a8824197/)
 
 ### **Contributing**
 1. Fork the repository
