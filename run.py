@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
 Quick Start Script
-=================
+=    elif command == "dashboard":
+        print("🌐 Starting web dashboard...")
+        subprocess.run([sys.executable, "-m", "streamlit", "run", "src/ui/streamlit_app.py"])=============
 
 Fast access to common system functions.
 """
@@ -47,7 +49,7 @@ def main():
     
     elif command == 'dashboard':
         print("🌐 Starting web dashboard...")
-        subprocess.run([sys.executable, "-m", "streamlit", "run", "src/ui/dashboard.py"])
+        subprocess.run([sys.executable, "-m", "streamlit", "run", "src/ui/streamlit_app.py"])
     
     elif command == 'health':
         print("🏥 Checking system health...")
