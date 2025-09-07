@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # API Keys for Financial Data
-ALPHA_VANTAGE_KEY = os.getenv('ALPHA_VANTAGE_API_KEY', 'YOUR_ALPHA_VANTAGE_KEY')
+ALPHA_VANTAGE_KEY = os.getenv('ALPHA_VANTAGE_KEY', 'YOUR_ALPHA_VANTAGE_KEY')
 FRED_API_KEY = os.getenv('FRED_API_KEY', 'YOUR_FRED_API_KEY')
 MARKETAUX_API_KEY = os.getenv('MARKETAUX_API_KEY', 'YOUR_MARKETAUX_API_KEY')
 
@@ -26,6 +26,9 @@ REDDIT_USER_AGENT = os.getenv('REDDIT_USER_AGENT', 'YOUR_REDDIT_USER_AGENT')
 
 # Additional Social Media APIs
 STOCKTWITS_TOKEN = os.getenv('STOCKTWITS_TOKEN', 'YOUR_STOCKTWITS_TOKEN')
+
+# Grok API Configuration
+GROK_API_KEY = os.getenv('GROK_API_KEY', 'YOUR_GROK_API_KEY')
 
 # Hugging Face Model Names for Sentiment Analysis
 MODEL_NAME = os.getenv('MODEL_NAME', 'ProsusAI/finbert')

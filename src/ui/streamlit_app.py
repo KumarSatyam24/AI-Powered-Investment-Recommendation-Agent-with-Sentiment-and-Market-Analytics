@@ -1,7 +1,17 @@
 """
 Streamlit-based UI for the Investment Recommendation project
 Allows the user to provide required data (API keys, portfolio params, tickers or CSV)
-and runs the hybrid recommendation engine or the investment dashboard.
+an    if st is None:
+        print("Streamlit not detected — running a quick CLI fallback demo")
+        try:
+            try:
+                from ui.investment_dashboard import InvestmentDashboard
+            except ImportError:
+                from src.ui.investment_dashboard import InvestmentDashboard
+            
+            dash = InvestmentDashboard()
+            demo = dash.generate_comprehensive_analysis(portfolio_size=50000, risk_tolerance='moderate', focus_tickers=['AAPL','MSFT'])
+            print(json.dumps(demo, indent=2, default=str))the hybrid recommendation engine or the investment dashboard.
 
 Run: streamlit run src/ui/streamlit_app.py
 
@@ -23,8 +33,13 @@ except Exception:
 # Ensure the `src` directory is on sys.path so imports like
 # `analysis_engine.*` and `ui.*` work when running from the repo root.
 SRC_DIR = os.path.dirname(os.path.dirname(__file__))
+PROJECT_ROOT = os.path.dirname(SRC_DIR)
+
+# Add both src directory and project root to Python path
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 # Delay importing heavy or project-local modules until runtime to avoid circular imports
 # We'll import `HybridRecommendationEngine` and `InvestmentDashboard` inside the button handler.
@@ -104,8 +119,13 @@ def run_streamlit_app():
         with st.spinner("Running analysis — this may take a while depending on tickers and APIs..."):
             try:
                 # Import heavy project modules lazily to avoid startup import cycles
-                from analysis_engine.hybrid_recommendations import HybridRecommendationEngine
-                from ui.investment_dashboard import InvestmentDashboard
+                try:
+                    from analysis_engine.hybrid_recommendations import HybridRecommendationEngine
+                    from ui.investment_dashboard import InvestmentDashboard
+                except ImportError:
+                    # Fallback to src prefix imports
+                    from src.analysis_engine.hybrid_recommendations import HybridRecommendationEngine
+                    from src.ui.investment_dashboard import InvestmentDashboard
 
                 if use_dashboard:
                     dash = InvestmentDashboard()

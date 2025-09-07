@@ -1,8 +1,34 @@
 from langdetect import detect
 import emoji
-from .sentiment_model import sentiment_analyzer, general_sentiment_analyzer
+from transformers import pipeline
+import torch
 from src.data_processing.data_fetch import get_tweets
+from src.api_clients.grok_api import GrokTwitterClient
 import re
+import os
+
+# Initialize sentiment analyzers
+device = 0 if torch.cuda.is_available() else -1
+
+try:
+    sentiment_analyzer = pipeline(
+        "sentiment-analysis",
+        model="ProsusAI/finbert",
+        framework="pt",
+        device=device
+    )
+except:
+    sentiment_analyzer = None
+
+try:
+    general_sentiment_analyzer = pipeline(
+        "sentiment-analysis",
+        model="distilbert-base-uncased-finetuned-sst-2-english",
+        framework="pt",
+        device=device
+    )
+except:
+    general_sentiment_analyzer = None
 
 # Contractions dictionary for expansion
 CONTRACTIONS = {
@@ -82,49 +108,84 @@ def preprocess_tweet(tweet):
     return ' '.join(tokens)
 
 
-def analyze_twitter_sentiment(ticker, use_general=False):
+def analyze_twitter_sentiment(ticker, use_general=False, use_grok_fallback=True):
     """
     Fetches recent tweets for the given ticker and from influential people, then returns sentiment scores.
     If use_general is True, uses general_sentiment_analyzer (DistilBERT); otherwise uses sentiment_analyzer (FinBERT).
+    If Twitter API fails due to rate limits, falls back to Grok-generated tweets.
     """
     tweets = []
-    # Fetch tweets for ticker
-    for t in get_tweets(ticker):
-        # Assume get_tweets returns a list of tweet objects or strings
-        # If string, wrap in dict with text field only, else fetch metadata
-        if isinstance(t, dict):
-            tweet_dict = {
-                "text": t.get("text", ""),
-                "created_at": t.get("created_at", None),
-                "likes": t.get("like_count", 0),
-                "retweets": t.get("retweet_count", 0)
-            }
+    twitter_api_failed = False
+    
+    # Try to fetch tweets for ticker using Twitter API
+    try:
+        twitter_tweets = get_tweets(ticker)
+        if not twitter_tweets:  # Empty result might indicate API issues
+            twitter_api_failed = True
         else:
-            tweet_dict = {
-                "text": t,
-                "created_at": None,
-                "likes": 0,
-                "retweets": 0
-            }
-        tweets.append(tweet_dict)
-    # Fetch tweets from influential people
-    for person in INFLUENTIAL_PEOPLE:
-        for t in get_tweets(person):
-            if isinstance(t, dict):
-                tweet_dict = {
-                    "text": t.get("text", ""),
-                    "created_at": t.get("created_at", None),
-                    "likes": t.get("like_count", 0),
-                    "retweets": t.get("retweet_count", 0)
-                }
-            else:
-                tweet_dict = {
-                    "text": t,
-                    "created_at": None,
-                    "likes": 0,
-                    "retweets": 0
-                }
-            tweets.append(tweet_dict)
+            for t in twitter_tweets:
+                if isinstance(t, dict):
+                    tweet_dict = {
+                        "text": t.get("text", ""),
+                        "created_at": t.get("created_at", None),
+                        "likes": t.get("like_count", 0),
+                        "retweets": t.get("retweet_count", 0)
+                    }
+                else:
+                    tweet_dict = {
+                        "text": t,
+                        "created_at": None,
+                        "likes": 0,
+                        "retweets": 0
+                    }
+                tweets.append(tweet_dict)
+    except Exception as e:
+        print(f"Twitter API failed for ticker {ticker}: {e}")
+        twitter_api_failed = True
+    
+    # Try to fetch tweets from influential people
+    if not twitter_api_failed:
+        for person in INFLUENTIAL_PEOPLE:
+            try:
+                person_tweets = get_tweets(person)
+                for t in person_tweets:
+                    if isinstance(t, dict):
+                        tweet_dict = {
+                            "text": t.get("text", ""),
+                            "created_at": t.get("created_at", None),
+                            "likes": t.get("like_count", 0),
+                            "retweets": t.get("retweet_count", 0)
+                        }
+                    else:
+                        tweet_dict = {
+                            "text": t,
+                            "created_at": None,
+                            "likes": 0,
+                            "retweets": 0
+                        }
+                    tweets.append(tweet_dict)
+            except Exception as e:
+                print(f"Twitter API failed for {person}: {e}")
+                twitter_api_failed = True
+                break
+    
+    # Fallback to Grok if Twitter API failed and fallback is enabled
+    if twitter_api_failed and use_grok_fallback:
+        print(f"Using Grok fallback to generate tweets for {ticker}")
+        try:
+            grok_client = GrokTwitterClient()
+            grok_tweets = grok_client.get_tweets_from_influencers(ticker, limit=15)
+            for tweet in grok_tweets:
+                tweets.append({
+                    "text": tweet.get("text", ""),
+                    "created_at": tweet.get("created_at", None),
+                    "likes": tweet.get("like_count", 0),
+                    "retweets": tweet.get("retweet_count", 0)
+                })
+            print(f"Generated {len(grok_tweets)} tweets using Grok")
+        except Exception as e:
+            print(f"Grok fallback also failed: {e}")
+            return []
     # Remove duplicates by text
     seen_texts = set()
     unique_tweets = []
@@ -153,8 +214,11 @@ def analyze_twitter_sentiment(ticker, use_general=False):
     return sentiments
 
 if __name__ == "__main__":
-    print("Using general_sentiment_analyzer (DistilBERT):")
-    results_general = analyze_twitter_sentiment("MSFT", use_general=True)
+    print("Testing Twitter Sentiment Analysis with Grok Fallback")
+    print("=" * 60)
+    
+    print("\nUsing general_sentiment_analyzer (DistilBERT):")
+    results_general = analyze_twitter_sentiment("MSFT", use_general=True, use_grok_fallback=True)
     for idx, res in enumerate(results_general, 1):
         print(f"Tweet {idx}:")
         print(f"  Text: {res['tweet']}")
@@ -163,8 +227,9 @@ if __name__ == "__main__":
         print(f"  Likes: {res['likes']}")
         print(f"  Retweets: {res['retweets']}")
         print()
-    print("Using sentiment_analyzer (FinBERT):")
-    results_finbert = analyze_twitter_sentiment("MSFT", use_general=False)
+    
+    print("\nUsing sentiment_analyzer (FinBERT):")
+    results_finbert = analyze_twitter_sentiment("MSFT", use_general=False, use_grok_fallback=True)
     for idx, res in enumerate(results_finbert, 1):
         print(f"Tweet {idx}:")
         print(f"  Text: {res['tweet']}")

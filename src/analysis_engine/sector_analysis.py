@@ -209,6 +209,10 @@ class SectorSentimentAnalyzer:
             # Get general market news (we'll classify by sector)
             articles = get_general_market_news()
             
+            if not articles:
+                print("⚠️  No articles found for analysis")
+                return self._get_empty_sector_results()
+            
             # Classify articles by sector
             sector_articles = defaultdict(list)
             
@@ -510,6 +514,20 @@ class SectorSentimentAnalyzer:
         print(report_content)
         
         return report_content
+    
+    def _get_empty_sector_results(self) -> Dict:
+        """Return empty sector results structure when no data is available"""
+        return {
+            'sector_sentiments': {},
+            'sector_rankings': {
+                'rankings': [],
+                'total_sectors_analyzed': 0
+            },
+            'total_articles': 0,
+            'total_articles_analyzed': 0,
+            'analysis_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'warning': 'No articles available for sector analysis'
+        }
 
 # Main execution and testing
 if __name__ == "__main__":

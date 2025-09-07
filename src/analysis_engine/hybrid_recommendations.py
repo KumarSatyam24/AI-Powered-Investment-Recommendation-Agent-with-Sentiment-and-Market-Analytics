@@ -77,6 +77,11 @@ class HybridRecommendationEngine:
             
             print(f"✅ Selected {len(top_sectors)} top sectors")
             
+            # Check if any sectors were found
+            if not top_sectors:
+                print("⚠️  No sectors found for analysis. Generating fallback recommendations...")
+                return self._generate_fallback_recommendations(portfolio_size, risk_tolerance)
+            
             # Step 3: Stock Analysis within Selected Sectors (Bottom-up)
             print("\n🔍 Step 2: Analyzing Individual Stocks...")
             stock_recommendations = {}
@@ -443,6 +448,92 @@ class HybridRecommendationEngine:
         print(f"\n⚠️  RISK MANAGEMENT:")
         for rec in risk['recommendations']:
             print(f"   • {rec}")
+    
+    def _generate_fallback_recommendations(self, portfolio_size: float, risk_tolerance: str) -> Dict:
+        """Generate fallback recommendations when no sectors are available."""
+        
+        # Create a basic portfolio allocation with broad market ETFs
+        fallback_allocation = {
+            'broad_market': {
+                'allocation_percentage': 60.0,
+                'allocation_amount': portfolio_size * 0.6,
+                'sector_percentage': 60.0,  # Add missing field
+                'stocks': [
+                    {
+                        'ticker': 'SPY',
+                        'company_name': 'SPDR S&P 500 ETF',
+                        'allocation_percentage': 40.0,
+                        'allocation_amount': portfolio_size * 0.4,
+                        'recommendation': 'BUY',
+                        'rationale': 'Broad market exposure'
+                    },
+                    {
+                        'ticker': 'QQQ',
+                        'company_name': 'Invesco QQQ Trust',
+                        'allocation_percentage': 20.0,
+                        'allocation_amount': portfolio_size * 0.2,
+                        'recommendation': 'BUY',
+                        'rationale': 'Technology sector exposure'
+                    }
+                ]
+            },
+            'bonds': {
+                'allocation_percentage': 40.0,
+                'allocation_amount': portfolio_size * 0.4,
+                'sector_percentage': 40.0,  # Add missing field
+                'stocks': [
+                    {
+                        'ticker': 'BND',
+                        'company_name': 'Vanguard Total Bond Market ETF',
+                        'allocation_percentage': 40.0,
+                        'allocation_amount': portfolio_size * 0.4,
+                        'recommendation': 'BUY',
+                        'rationale': 'Fixed income stability'
+                    }
+                ]
+            }
+        }
+        
+        # Create risk assessment
+        risk_assessment = {
+            'risk_level': 'Medium',
+            'diversification_score': 70.0,
+            'sector_concentration': 0.3,
+            'volatility_estimate': 0.15,
+            'max_drawdown_estimate': 0.12,
+            'recommendations': [
+                'Portfolio uses broad market ETFs due to limited sector data',
+                'Consider rebalancing when more sector data becomes available',
+                'Monitor news and sentiment for individual sector opportunities'
+            ]
+        }
+        
+        return {
+            'portfolio_summary': {
+                'total_value': portfolio_size,
+                'risk_tolerance': risk_tolerance,
+                'sectors_selected': 2,
+                'total_positions': 3,
+                'analysis_date': datetime.now().isoformat(),
+                'fallback_mode': True
+            },
+            'sector_analysis': {'rankings': []},
+            'selected_sectors': ['broad_market', 'bonds'],
+            'portfolio_allocation': fallback_allocation,
+            'risk_assessment': risk_assessment,
+            'execution_plan': {
+                'immediate_actions': [
+                    'Purchase SPY for core equity exposure',
+                    'Purchase QQQ for technology exposure', 
+                    'Purchase BND for fixed income stability'
+                ],
+                'monitoring_schedule': 'Weekly review recommended'
+            },
+            'monitoring_alerts': [
+                'Fallback portfolio active - sector analysis unavailable',
+                'Consider upgrading news data sources for better analysis'
+            ]
+        }
 
 # Test and demonstration
 if __name__ == "__main__":

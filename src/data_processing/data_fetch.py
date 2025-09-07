@@ -99,32 +99,62 @@ def get_market_conditions():
     }
 
 def get_latest_headlines(query):
-    """Get latest headlines - enhanced with MarketAux fallback."""
-    # Try NewsAPI first
+    """Get latest headlines - combining NewsAPI and MarketAux for comprehensive coverage."""
+    all_headlines = []
+    sources_used = []
+    
+    # 1. Get headlines from NewsAPI
+    newsapi_headlines = []
     if NEWS_API_KEY and NEWS_API_KEY != "YOUR_NEWSAPI_KEY":
         try:
             newsapi = NewsApiClient(api_key=NEWS_API_KEY)
-            articles = newsapi.get_everything(q=query, language="en", page_size=5)
-            headlines = [a['title'] for a in articles['articles']]
-            if headlines:
-                return headlines
+            articles = newsapi.get_everything(
+                q=query, 
+                language="en", 
+                page_size=8,  # Increased to get more variety
+                sort_by="publishedAt"
+            )
+            newsapi_headlines = [a['title'] for a in articles['articles']]
+            if newsapi_headlines:
+                all_headlines.extend(newsapi_headlines)
+                sources_used.append("NewsAPI")
+                print(f"✅ NewsAPI: Found {len(newsapi_headlines)} headlines")
         except Exception as e:
-            print(f"NewsAPI error: {e}")
+            print(f"❌ NewsAPI error: {e}")
     
-    # Fallback to MarketAux
+    # 2. Get headlines from MarketAux (always try, regardless of NewsAPI success)
+    marketaux_headlines = []
     try:
-        if query.upper() in ['AAPL', 'TSLA', 'GOOGL', 'MSFT', 'AMZN']:  # If it's a stock symbol
-            news_data = marketaux_api.get_news_by_symbol(query.upper(), limit=5)
+        if query.upper() in ['AAPL', 'TSLA', 'GOOGL', 'MSFT', 'AMZN', 'NVDA', 'META', 'NFLX']:  # Stock symbols
+            news_data = marketaux_api.get_news_by_symbol(query.upper(), limit=7)
         else:
-            news_data = marketaux_api.get_trending_news(limit=5)
+            news_data = marketaux_api.get_trending_news(limit=7)
         
-        headlines = [article['title'] for article in news_data.get('data', [])]
-        if headlines:
-            return headlines
+        marketaux_headlines = [article['title'] for article in news_data.get('data', [])]
+        if marketaux_headlines:
+            all_headlines.extend(marketaux_headlines)
+            sources_used.append("MarketAux")
+            print(f"✅ MarketAux: Found {len(marketaux_headlines)} headlines")
     except Exception as e:
-        print(f"MarketAux error: {e}")
+        print(f"❌ MarketAux error: {e}")
     
-    # Final fallback to sample data
+    # 3. Remove duplicates while preserving order
+    seen_headlines = set()
+    unique_headlines = []
+    for headline in all_headlines:
+        # Simple duplicate detection based on first 50 characters
+        headline_key = headline[:50].lower().strip()
+        if headline_key not in seen_headlines and len(headline.strip()) > 10:
+            seen_headlines.add(headline_key)
+            unique_headlines.append(headline)
+    
+    # 4. Return combined results
+    if unique_headlines:
+        print(f"📊 Combined: {len(unique_headlines)} unique headlines from {', '.join(sources_used)}")
+        return unique_headlines[:15]  # Limit to 15 best headlines
+    
+    # Final fallback to sample data only if both sources fail
+    print("⚠️ Both NewsAPI and MarketAux failed, using sample data")
     return [
         "Sample positive news about the market.",
         "Market outlook improves as investors gain confidence.",

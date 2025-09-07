@@ -19,7 +19,7 @@ class FREDAPI:
     def _make_request(self, endpoint: str, params: Dict) -> Optional[Dict]:
         """Make API request to FRED."""
         if not self.api_key or self.api_key == "YOUR_FRED_API_KEY":
-            print("FRED API key not configured. Using mock data.")
+            print("⚠️  FRED API key not configured. Using mock economic data.")
             return None
         
         params.update({
@@ -34,7 +34,12 @@ class FREDAPI:
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            print(f"Error making FRED API request: {e}")
+            if "not registered" in str(e) or "Bad Request" in str(e):
+                print(f"❌ FRED API key invalid: {e}")
+                print("💡 Using mock economic data instead")
+            else:
+                print(f"⚠️  FRED API request failed: {e}")
+                print("🔄 Falling back to mock economic data")
             return None
     
     def get_economic_indicator(self, series_id: str, limit: int = 10) -> Dict:
@@ -63,8 +68,45 @@ class FREDAPI:
             return self._get_mock_indicator(series_id)
     
     def get_inflation_rate(self) -> Dict:
-        """Get Consumer Price Index (CPI) inflation rate."""
-        return self.get_economic_indicator('CPIAUCSL')
+        """Get Consumer Price Index (CPI) inflation rate as year-over-year percentage change."""
+        try:
+            # Get CPI data for the last 13 months to calculate YoY change
+            url = f"{self.BASE_URL}/series/observations"
+            params = {
+                'series_id': 'CPIAUCSL',
+                'api_key': self.api_key,
+                'file_type': 'json',
+                'limit': 13,
+                'sort_order': 'desc'
+            }
+            
+            response = self._make_request("series/observations", params)
+            if not response:
+                return self._get_mock_indicator('CPIAUCSL_INFLATION_RATE')
+            
+            observations = response.get('observations', [])
+            if len(observations) >= 13:
+                # Calculate year-over-year inflation rate
+                current_cpi = float(observations[0]['value'])
+                year_ago_cpi = float(observations[12]['value'])
+                inflation_rate = ((current_cpi - year_ago_cpi) / year_ago_cpi) * 100
+                
+                return {
+                    'series_id': 'CPIAUCSL_INFLATION_RATE',
+                    'latest_value': round(inflation_rate, 2),
+                    'latest_date': observations[0]['date'],
+                    'calculation_method': 'year_over_year_percentage_change',
+                    'current_cpi': current_cpi,
+                    'year_ago_cpi': year_ago_cpi,
+                    'data_source': 'fred_api'
+                }
+            else:
+                # Fallback to mock data if insufficient historical data
+                return self._get_mock_indicator('CPIAUCSL_INFLATION_RATE')
+                
+        except Exception as e:
+            print(f"Error calculating inflation rate: {e}")
+            return self._get_mock_indicator('CPIAUCSL_INFLATION_RATE')
     
     def get_unemployment_rate(self) -> Dict:
         """Get unemployment rate."""
@@ -186,26 +228,49 @@ class FREDAPI:
         return result
     
     def _get_mock_indicator(self, series_id: str) -> Dict:
-        """Return mock indicator data when API is not available."""
+        """Return realistic mock indicator data when API is not available."""
+        # Realistic economic indicators as of September 2025
         mock_values = {
-            'CPIAUCSL': '310.5',  # CPI
-            'UNRATE': '3.8',      # Unemployment
-            'GDP': '27000.0',     # GDP
-            'FEDFUNDS': '5.25',   # Fed Funds Rate
-            'GS10': '4.2',        # 10Y Treasury
-            'VIXCLS': '18.5',     # VIX
-            'UMCSENT': '85.0'     # Consumer Sentiment
+            'CPIAUCSL': '322.5',        # CPI Index (for completeness)
+            'CPIAUCSL_INFLATION_RATE': '3.2',  # Actual inflation rate percentage
+            'UNRATE': '3.8',        # Unemployment Rate
+            'GDP': '27000.0',       # GDP in billions
+            'FEDFUNDS': '5.25',     # Federal Funds Rate
+            'GS10': '4.15',         # 10-Year Treasury Rate
+            'VIXCLS': '18.5',       # VIX Fear Index
+            'UMCSENT': '85.0',      # Consumer Sentiment
+            'DCOILWTICO': '85.50',  # Crude Oil (WTI) Price
+            'DHHNGSP': '2.85',      # Natural Gas Price
+            'DGS3MO': '5.10',       # 3-Month Treasury
+            'DEXUSEU': '1.08',      # USD/EUR Exchange Rate
+            'OPHNFB': '115.2',      # Manufacturing Index
+            'USPATENTAPP': '45000'  # Patent Applications
         }
+        
+        # Generate mock time series with slight variations
+        mock_observations = []
+        for i in range(5):  # Last 5 data points
+            date_offset = i * 30  # 30 days apart
+            base_date = datetime(2025, 9, 8) - timedelta(days=date_offset)
+            
+            base_value = float(mock_values.get(series_id, '100.0'))
+            # Add small random variation (-2% to +2%)
+            import random
+            variation = 1 + (random.random() - 0.5) * 0.04
+            varied_value = round(base_value * variation, 2)
+            
+            mock_observations.append({
+                'date': base_date.strftime('%Y-%m-%d'),
+                'value': str(varied_value)
+            })
         
         return {
             'series_id': series_id,
-            'observations': [{
-                'date': '2025-08-25',
-                'value': mock_values.get(series_id, '100.0')
-            }],
-            'latest_value': mock_values.get(series_id, '100.0'),
-            'latest_date': '2025-08-25',
-            'count': 1
+            'observations': mock_observations,
+            'latest_value': mock_observations[0]['value'],
+            'latest_date': mock_observations[0]['date'],
+            'count': len(mock_observations),
+            'data_source': 'mock_fallback'
         }
 
 # Global instance
