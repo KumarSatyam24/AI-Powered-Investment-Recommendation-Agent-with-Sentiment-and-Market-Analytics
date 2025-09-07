@@ -1,89 +1,126 @@
-# New APIs Integration Guide
+# Comprehensive API Integration Guide
 
-## 🚀 Recently Added APIs
+This guide provides a complete overview of all APIs integrated into the AI-Powered Investment Recommendation System. It covers setup, usage, fallback strategies, and performance tips for the 6 primary data sources.
+
+## 🚀 Integrated APIs
 
 ### 1. Alpha Vantage API
-- **Purpose**: Enhanced stock data and technical indicators
-- **Free Tier**: 25 requests per day
+- **Purpose**: Core stock data, company fundamentals, and technical indicators.
+- **Free Tier**: 25 requests per day.
 - **Key Features**:
-  - Real-time stock quotes
-  - Company fundamentals (P/E, EPS, market cap, etc.)
-  - Technical indicators (SMA, EMA, RSI, MACD)
-  - Better reliability than yfinance for production
+  - Real-time and historical stock prices.
+  - Company fundamentals (P/E, EPS, Market Cap).
+  - Technical indicators (SMA, EMA, RSI, MACD).
 
 ### 2. FRED API (Federal Reserve Economic Data)
-- **Purpose**: Macroeconomic indicators for market analysis
-- **Free Tier**: Completely free, no rate limits
+- **Purpose**: Macroeconomic indicators for market analysis.
+- **Free Tier**: No rate limits.
 - **Key Features**:
-  - Inflation rates (CPI)
-  - Unemployment data
-  - Federal funds rate
-  - VIX (volatility index)
-  - Consumer sentiment
-  - Treasury rates
-  - Economic growth indicators
+  - Inflation rates (CPI) for YoY calculation.
+  - Unemployment data, Federal Funds Rate, GDP.
+  - VIX (Volatility Index) and Treasury rates.
 
-### 3. MarketAux API
-- **Purpose**: Financial news with sentiment analysis
-- **Free Tier**: 200 requests per month
+### 3. NewsAPI
+- **Purpose**: Primary source for real-time financial news.
+- **Free Tier**: 100 requests per day.
 - **Key Features**:
-  - Real-time financial news
-  - Symbol-specific news filtering
-  - Sentiment analysis
-  - Market movers identification
-  - Multi-source news aggregation
+  - Global news from over 70,000 sources.
+  - Symbol-specific and general market news.
+  - Used as the primary news source in the sentiment engine.
+
+### 4. MarketAux API
+- **Purpose**: Secondary news source and fallback for NewsAPI.
+- **Free Tier**: 10,000 requests per month.
+- **Key Features**:
+  - Real-time financial news with built-in sentiment.
+  - High-quality data, serves as a robust fallback.
+  - Ensures news coverage if NewsAPI hits its rate limit.
+
+### 5. Twitter & Reddit APIs (via Libraries)
+- **Purpose**: Social media sentiment analysis.
+- **Setup**: Requires developer accounts and API keys for both platforms.
+- **Key Features**:
+  - Real-time sentiment from retail investors and the public.
+  - Crucial for the Unified Sentiment score (30% weight each).
+  - Captures market hype and grassroots trends.
+
+### 6. Grok AI API
+- **Purpose**: Advanced, context-aware sentiment analysis.
+- **Usage**: Serves as an intelligent fallback for the sentiment engine.
+- **Key Features**:
+  - Provides nuanced sentiment when traditional models are uncertain.
+  - Understands complex financial language and context.
+  - Enhances the reliability of the overall sentiment score.
 
 ## 🔧 Setup Instructions
 
 ### Step 1: Install Dependencies
+Ensure all dependencies are installed from the project's `requirements.txt`:
 ```bash
 pip install -r requirements.txt
 ```
 
 ### Step 2: Get API Keys
-
-#### Alpha Vantage
-1. Visit: https://www.alphavantage.co/support/#api-key
-2. Sign up with email
-3. Copy your free API key
-
-#### FRED (Federal Reserve)
-1. Visit: https://fred.stlouisfed.org/docs/api/api_key.html
-2. Create an account
-3. Request API key (instant approval)
-
-#### MarketAux
-1. Visit: https://www.marketaux.com/
-2. Sign up for free account
-3. Get API key from dashboard
+You will need to acquire API keys from the following services:
+- **Alpha Vantage**: [alphavantage.co](https://www.alphavantage.co/support/#api-key)
+- **FRED**: [fred.stlouisfed.org](https://fred.stlouisfed.org/docs/api/api_key.html)
+- **NewsAPI**: [newsapi.org](https://newsapi.org/s/google-news-api)
+- **MarketAux**: [marketaux.com](https://www.marketaux.com/)
+- **Twitter**: [developer.twitter.com](https://developer.twitter.com/en/portal/dashboard)
+- **Reddit**: [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps)
+- **Grok AI**: From your Grok account dashboard.
 
 ### Step 3: Update Environment Variables
-Add these to your `.env` file:
+Create or update your `.env` file with all the required keys:
 ```env
-ALPHA_VANTAGE_KEY=your_alpha_vantage_key_here
-FRED_API_KEY=your_fred_api_key_here
-MARKETAUX_API_KEY=your_marketaux_api_key_here
+# Financial Data
+ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key
+
+# Economic Data
+FRED_API_KEY=your_fred_api_key
+
+# News APIs
+NEWS_API_KEY=your_newsapi_key
+MARKETAUX_API_KEY=your_marketaux_key
+
+# Social Media APIs
+TWITTER_CONSUMER_KEY=your_twitter_consumer_key
+TWITTER_CONSUMER_SECRET=your_twitter_consumer_secret
+TWITTER_ACCESS_TOKEN=your_twitter_access_token
+TWITTER_ACCESS_TOKEN_SECRET=your_twitter_access_token_secret
+REDDIT_CLIENT_ID=your_reddit_client_id
+REDDIT_CLIENT_SECRET=your_reddit_client_secret
+REDDIT_USER_AGENT=your_reddit_user_agent
+
+# AI Model API
+GROK_API_KEY=your_grok_api_key
 ```
 
 ### Step 4: Test the Integration
+Run the full test suite to ensure all APIs are configured correctly:
 ```bash
-python tests/api_test.py
+python tests/full_test.py
 ```
 
-## 🎯 Usage Examples
+## 🎯 Core System Integrations
 
-### Enhanced Stock Data
+### Unified Sentiment Analysis
+The system fuses sentiment from multiple sources into a single, weighted score:
+- **News Sentiment (40%)**: From NewsAPI & MarketAux, analyzed by FinBERT.
+- **Twitter Sentiment (30%)**: Real-time tweets.
+- **Reddit Sentiment (30%)**: Posts and comments from financial subreddits.
+- **Grok AI Fallback**: Used when confidence is low.
+
 ```python
-from src.data_processing.data_fetch import get_enhanced_stock_data
+from src.sentiment_analysis.unified_sentiment import get_unified_sentiment
 
-# Get comprehensive stock information
-stock_data = get_enhanced_stock_data('AAPL')
-print(f"Price: ${stock_data['price']}")
-print(f"P/E Ratio: {stock_data['company_overview']['pe_ratio']}")
-print(f"Technical SMA: {stock_data['technical_indicators']['sma_20']}")
+# Get the fused sentiment score for a stock
+unified_score = get_unified_sentiment('TSLA')
+print(f"Unified Sentiment Score for TSLA: {unified_score['unified_sentiment']:.3f}")
 ```
 
 ### Market Analysis with Economic Data
+The FRED API powers the `analyze_market` function, providing real-world economic context.
 ```python
 from src.analysis_engine.market_analysis import analyze_market
 
@@ -91,90 +128,69 @@ from src.analysis_engine.market_analysis import analyze_market
 analysis = analyze_market()
 print(f"Market Condition: {analysis['condition']}")
 print(f"Risk Score: {analysis['risk_score']}/10")
-print(f"Recommendation: {analysis['recommendation']}")
-```
-
-### News Sentiment Analysis
-```python
-from src.data_processing.data_fetch import get_enhanced_news_sentiment
-
-# Get sentiment for specific stock
-sentiment = get_enhanced_news_sentiment('TSLA')
-print(f"Overall Sentiment: {sentiment['overall_sentiment']}")
-print(f"Articles Analyzed: {sentiment['total_articles']}")
+print(f"YoY Inflation: {analysis['economic_indicators']['inflation']}%")
 ```
 
 ## 📊 API Comparison
 
-| Feature | yfinance | Alpha Vantage | NewsAPI | MarketAux | FRED |
-|---------|----------|---------------|---------|-----------|------|
-| Stock Data | ✅ | ✅+ | ❌ | ❌ | ❌ |
-| Company Info | ✅ | ✅+ | ❌ | ❌ | ❌ |
-| Technical Indicators | ❌ | ✅ | ❌ | ❌ | ❌ |
-| Economic Data | ❌ | ❌ | ❌ | ❌ | ✅ |
-| News | ❌ | ❌ | ✅ | ✅+ | ❌ |
-| Sentiment Analysis | ❌ | ❌ | ❌ | ✅ | ❌ |
-| Rate Limits | High | 25/day | 1000/day | 200/month | None |
-| Reliability | Medium | High | High | High | Very High |
+| Feature | Alpha Vantage | FRED | NewsAPI | MarketAux | Twitter/Reddit | Grok AI |
+|----------------------|---------------|------|---------|-----------|----------------|---------|
+| **Stock Data** | ✅ (Primary) | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Economic Data** | ❌ | ✅ (Primary) | ❌ | ❌ | ❌ | ❌ |
+| **News** | ❌ | ❌ | ✅ (Primary) | ✅ (Fallback) | ❌ | ❌ |
+| **Social Sentiment** | ❌ | ❌ | ❌ | ❌ | ✅ (Primary) | ❌ |
+| **Advanced Sentiment** | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ (Fallback) |
+| **Rate Limits** | Low | None | Medium | High | Medium | Varies |
+| **Reliability** | High | Very High | High | High | Medium | High |
 
-## 🔄 Fallback Strategy
+## 🔄 Fallback & Redundancy Strategy
 
-The system implements intelligent fallbacks:
+The system is designed for high availability with an intelligent fallback chain:
 
-1. **Stock Data**: yfinance → Alpha Vantage → Mock data
-2. **News**: NewsAPI → MarketAux → Mock headlines
-3. **Economic Data**: FRED → Mock indicators
+1.  **News Data**:
+    - **Primary**: `NewsAPI`
+    - **Fallback**: `MarketAux`
+    - **Failure**: Proceeds with social media sentiment only.
 
-## 🎨 Dashboard Integration
+2.  **Sentiment Analysis**:
+    - **Primary**: `FinBERT` model on News, Twitter, and Reddit data.
+    - **Fallback**: `Grok AI` is triggered if FinBERT's confidence is low or sources are unavailable.
+    - **Failure**: A neutral sentiment score is assumed.
 
-The APIs are integrated into your Streamlit dashboard through:
+3.  **Market & Sector Analysis**:
+    - **Primary**: Analysis based on available news and sentiment.
+    - **Fallback**: If no trending sectors are found, the system recommends a diversified ETF portfolio (`SPY`, `QQQ`, `BND`).
 
-- `get_enhanced_stock_data()` - Shows comprehensive stock info
-- `get_market_conditions()` - Displays economic indicators
-- `get_enhanced_news_sentiment()` - Provides news sentiment analysis
-- `analyze_market()` - Gives market condition assessment
+## ⚡ Performance & Optimization
 
-## ⚡ Performance Tips
+1.  **Caching**: API responses, especially for less volatile data like economic indicators, are cached to reduce redundant calls.
+2.  **Asynchronous Calls**: `asyncio` is used to fetch data from multiple APIs concurrently, significantly speeding up analysis.
+3.  **Rate Limit Handling**: The system includes built-in error handling to gracefully manage API rate limits.
+4.  **Selective Loading**: Only necessary data points are requested from APIs to minimize payload size and processing time.
 
-1. **Caching**: Implement caching for FRED data (updates daily)
-2. **Rate Limiting**: Monitor Alpha Vantage usage (25 calls/day)
-3. **Batch Requests**: Group related API calls
-4. **Error Handling**: Always have fallbacks for API failures
+## 🚨 Common Issues & Solutions
 
-## 🚨 Common Issues
-
-### API Key Not Working
-- Check if key is correctly set in `.env`
-- Verify key hasn't expired
-- Check API provider's status page
+### API Key Errors
+- **Symptom**: `401 Unauthorized` or `Invalid Key` errors.
+- **Solution**: Double-check that the correct API keys are in your `.env` file and that there are no extra spaces or characters. Ensure the `.env` file is in the project's root directory.
 
 ### Rate Limit Exceeded
-- Alpha Vantage: Wait for daily reset
-- MarketAux: Upgrade plan or optimize calls
-- FRED: No limits (shouldn't happen)
+- **Symptom**: `429 Too Many Requests` errors.
+- **Solution**: This is expected with free-tier keys. The system is designed to handle this, but for extensive use, consider upgrading keys for NewsAPI and Alpha Vantage.
 
 ### Import Errors
-- Make sure new dependencies are installed
-- Check Python path includes backend folder
-- Verify `__init__.py` files exist
+- **Symptom**: `ModuleNotFoundError`.
+- **Solution**:
+    - Ensure you have run `pip install -r requirements.txt`.
+    - Verify your Python interpreter is selected for the project's virtual environment.
+    - Check that `__init__.py` files exist in all necessary directories.
 
-## 📈 Next Steps
-
-1. **Test all APIs** with your keys
-2. **Update dashboard** to use enhanced functions
-3. **Monitor usage** to stay within limits
-4. **Optimize calls** based on user patterns
-5. **Add more indicators** as needed
-
-## 🔗 API Documentation
+## 🔗 Official API Documentation
 
 - **Alpha Vantage**: https://www.alphavantage.co/documentation/
 - **FRED**: https://fred.stlouisfed.org/docs/api/
+- **NewsAPI**: https://newsapi.org/docs
 - **MarketAux**: https://www.marketaux.com/documentation
-
-## 💡 Pro Tips
-
-- Use FRED data for macro analysis (free and reliable)
-- Alpha Vantage for detailed stock fundamentals
-- MarketAux for sentiment-driven insights
-- Combine all three for comprehensive analysis
+- **Grok AI**: Provided with your developer account.
+- **Twitter**: https://developer.twitter.com/en/docs
+- **PRAW (for Reddit)**: https://praw.readthedocs.io/en/stable/
