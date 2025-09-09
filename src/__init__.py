@@ -15,4 +15,4 @@ License: MIT
 
 __version__ = "2.0.0"
 __author__ = "Satyam Kumar"
-__email__ = "your.email@example.com"
+__email__ = "sk7474481@gmail.com"
