@@ -71,9 +71,15 @@ investment-recommendation-system/
 ├── 📜 scripts/                     # Utility scripts
 │   ├── setup.py                    # System setup automation
 │   └── health_check.py             # API health monitoring
-├── 📚 docs/                        # Documentation
-│   ├── API_INTEGRATION_GUIDE.md   # API setup guide
-│   └── IMPLEMENTATION_SUMMARY.md  # Technical implementation details
+├── 📚 docs/                        # Complete Documentation
+│   ├── API_INTEGRATION_GUIDE.md   # API setup & configuration guide
+│   ├── API_TESTING_GUIDE.md       # API testing & troubleshooting
+│   ├── CSV_EXPORT_GUIDE.md        # Data export functionality
+│   ├── IMPLEMENTATION_SUMMARY.md  # Technical implementation details
+│   ├── PRODUCTION_ML_SUCCESS_SUMMARY.md # ML model performance
+│   ├── PROJECT_DOCUMENTATION.md   # Comprehensive project overview
+│   ├── SOLUTION_SUMMARY.md        # Solution architecture & features
+│   └── INDEX.md                   # Documentation navigation
 ├── 🎯 main.py                      # Command-line interface
 ├── 📋 requirements.txt             # Python dependencies
 ├── 🔐 .env                         # API keys & secrets (not in repo)
@@ -424,8 +430,17 @@ python tests/test_all_apis_fixed.py  # Shows which APIs work
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open Pull Request
 
+### **Documentation**
+📚 [**Complete Documentation**](docs/INDEX.md) - All guides and references
+- 🔧 [API Integration Guide](docs/API_INTEGRATION_GUIDE.md) - Setup & configuration
+- 🧪 [API Testing Guide](docs/API_TESTING_GUIDE.md) - Testing & troubleshooting  
+- 📊 [CSV Export Guide](docs/CSV_EXPORT_GUIDE.md) - Data export features
+- 🏗️ [Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md) - Technical details
+- 🎯 [Solution Summary](docs/SOLUTION_SUMMARY.md) - Architecture overview
+- 📈 [ML Success Summary](docs/PRODUCTION_ML_SUCCESS_SUMMARY.md) - Model performance
+
 ### **Support**
-- 📖 Check [docs/](docs/) for detailed guides
+- 📖 Check [docs/](docs/) for comprehensive guides
 - 🐛 Report issues on GitHub
 - 💡 Feature requests welcome
 

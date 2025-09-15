@@ -16,9 +16,30 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
 
 # Environment files
 .env
@@ -28,6 +49,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+config.env
+secrets.json
 
 # IDE
 .vscode/
@@ -36,7 +59,7 @@ venv.bak/
 *.swo
 *~
 
-# OS
+# OS generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -55,7 +78,15 @@ models/
 *.joblib
 .transformers_cache/
 
-# Data files
+# Project specific generated files
+# API status reports
+api_status_report_*.json
+
+# Generated data exports
+data_exports/
+production_ml_data/
+
+# Data files (but keep requirements.txt)
 data/
 *.csv
 *.json
@@ -63,6 +94,13 @@ data/
 *.db
 *.sqlite
 *.sqlite3
+!requirements.txt
+
+# Debug and temporary files
+debug_*.py
+temp_*.py
+test_*_backup.py
+quick_api_check.py
 
 # Reports and outputs
 reports/
@@ -70,18 +108,9 @@ outputs/
 *.txt
 *.xlsx
 
-# Jupyter
+# Jupyter Notebook
 .ipynb_checkpoints/
-
-# Coverage reports
-htmlcov/
-.coverage
-.coverage.*
-coverage.xml
-*.cover
-
-# pytest
-.pytest_cache/
+*.ipynb
 
 # Streamlit
 .streamlit/
@@ -89,3 +118,11 @@ coverage.xml
 # API rate limiting temp files
 temp_*
 cache_*
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Virtual environment
+.Python
